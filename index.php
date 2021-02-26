@@ -12,20 +12,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js" integrity="sha384-KsvD1yqQ1/1+IA7gi3P0tyJcT3vR+NdBTt13hSJ2lnve8agRGXTTyNaBYmCR/Nwi" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js" integrity="sha384-nsg8ua9HAw1y0W1btsyWgBklPnCUAFLuTMS2G72MMONqmOymq585AcH49TLBQObG" crossorigin="anonymous"></script>
     <link rel='stylesheet' type='text/css' href='css/style.css' />
+    <link href="https://fonts.googleapis.com/css2?family=Amaranth&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" >Files system</a>
-        </div>
+    <nav class="navbar  navbar-dark bg-dark">
+        <h1>Files <i class="fas fa-file-upload"></i></h1>
+
     </nav>
 </header>
 
 <main>
 
+<div class="container">
     <table class="table table-dark table-hover">
         <tr>
             <th>Názov súboru</th>
@@ -48,6 +49,24 @@
             <td>80</td>
         </tr>
     </table>
+</div>
+
+<div class="container-card">
+    <div class="card text-white bg-dark">
+        <div class="card-body">
+            <form action="upload.php" method="post" enctype="multipart/form-data">
+                <h3>Vybrať súbor na upload:</h3>
+
+                <input type="file" name="fileToUpload" id="fileToUpload">
+                <input type="submit" value="Upload File" name="submit">
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
 </main>
 
 
