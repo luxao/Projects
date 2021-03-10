@@ -1,3 +1,15 @@
+<?php
+
+use JetBrains\PhpStorm\Pure;
+
+    $sizeDesc = "fileSizeDesc";
+    $sizeAsc = "fileSizeAsc";
+    $DateDesc = "fileDateDesc";
+    $DateAsc = "fileDateAsc";
+    $urlDir = $_GET['getDirContent'];
+    $urlName = $_GET['sorting'];
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,57 +32,160 @@
 <header>
     <nav class="navbar  navbar-dark bg-dark">
         <h1>Files <i class="fas fa-file-upload"></i></h1>
-
     </nav>
 </header>
 
 <main>
 
-<div class="container">
-    <table class="table table-dark table-hover">
-        <tr>
-            <th>Názov súboru</th>
-            <th>veľkosť súboru</th>
-            <th>Dátum</th>
-        </tr>
-        <tr>
-            <td>Jill</td>
-            <td>Smith</td>
-            <td>50</td>
-        </tr>
-        <tr>
-            <td>Eve</td>
-            <td>Jackson</td>
-            <td>94</td>
-        </tr>
-        <tr>
-            <td>John</td>
-            <td>Doe</td>
-            <td>80</td>
-        </tr>
-    </table>
-</div>
+    <div class="container">
+        <table class='table table-dark table-hover'>
+            <thead>
+            <tr>
+                <th>Názov súboru
+                    <form action='index.php' method='post'>
+                        <button type='submit' name='sortNamesDesc'><i class='fas fa-sort-alpha-down-alt'></i></button>
+                        <button type='submit' name='sortNamesAsc'><i class='fas fa-sort-alpha-down'></i></button>
+                        <a href='index.php'><i class='fas fa-undo'></i></a>
+                    </form></th>
+                <th>veľkosť súboru <small>(KB)</small>  <form action='index.php' method='post'>
+                        <a  href='?sorting=<?php echo $sizeDesc?>'><i class='fas fa-sort-numeric-down'></i></a>
+                        <a href='?sorting=<?php echo $sizeAsc?>' > <i class='fas fa-sort-numeric-down-alt'></i></a>
+                    </form></th>
 
-<div class="container-card">
-    <div class="card text-white bg-dark">
-        <div class="card-body">
-            <form action="upload.php" method="post" enctype="multipart/form-data">
-                <h3>Vybrať súbor na upload:</h3>
+                <th>Dátum <form action='index.php' method='post'>
+                        <a href='?sorting=<?php echo $DateDesc?>'><i class='fas fa-sort-amount-up'></i></a>
+                        <a href='?sorting=<?php echo $DateAsc?>' ><i class='fas fa-sort-amount-down-alt'></i></a>
+                    </form></th>
+            </tr>
+            </thead>
 
-                <input type="file" name="fileToUpload" id="fileToUpload">
-                <input type="submit" value="Upload File" name="submit">
-            </form>
+            <?php
+            //nastavenie europskeho času
+            date_default_timezone_set("Europe/Bratislava");
+            if(!$_GET['getDirContent']){
+
+            $directory = "../files/";
+            //načitanie obsahu priečinka bez . a ..
+            $dir = array_diff(scandir($directory), array('..', '.'));
+            $length = count($dir);
+            $tmp = array();
+
+
+            // sortovanie podla nazvov
+            if(isset($_POST['sortNamesDesc'])){
+                rsort($dir);
+            }
+            if(isset($_POST['sortNamesAsc'])){
+                sort($dir);
+            }
+
+            //funkcia na sortovanie velkosti
+            function sizeSort($size1, $size2)
+            {
+                if (filesize("../files/".$size1) == filesize("../files/".$size2))
+                {
+                    return 0;
+                }
+                return (filesize("../files/".$size1) < filesize("../files/".$size2)) ? -1 : 1;
+            }
+
+            //funkcia na sortovanie datumov
+            #[Pure] function compareByTimeStamp($time1, $time2)
+            {
+                if (filemtime("../files/".$time1) < filemtime("../files/".$time2))
+                    return 1;
+                else if (filemtime("../files/".$time1) > filemtime("../files/".$time2))
+                    return -1;
+                else
+                    return 0;
+            }
+
+        // sortovanie
+            if($urlName == "fileSizeDesc"){
+                usort($dir,"sizeSort");
+            }
+            else if($urlName == "fileSizeAsc"){
+               usort($dir, "sizeSort");
+               $dir = array_reverse($dir);
+            }
+            else if($urlName == "fileDateDesc"){
+                usort($dir, "compareByTimeStamp");
+            }
+            else if($urlName == "fileDateAsc"){
+                usort($dir, "compareByTimeStamp");
+                $dir = array_reverse($dir);
+            }
+
+                foreach ($dir as $value){
+                    echo "
+                    <tr>
+                    <td>";
+
+                    if(is_dir("../files/$value")){
+                        echo "<a href='?getDirContent=$value'>".$value."</a>";
+                    }
+
+                  else {
+                      //vypis mena
+                      $tmp = explode("-",$value);
+                      $ext = explode(".",$tmp[1]);
+                      echo $tmp[0].".".$ext[1];
+                  }
+                  echo "
+                    </td>
+                     <td>".(is_dir("../files/$value")? (' ') : round((filesize("../files/$value") / 1024), 0))."</td>
+                    <td>".(is_dir("../files/$value")? (' ') : date('M d Y H:i:s',filemtime("../files/$value")))."</td>
+                    ";
+                }
+            }
+
+            if($_GET['getDirContent']){
+                $dir = array_diff(scandir('../files/Priečinok/'), array('..', '.'));
+                foreach ($dir as $item){
+                    echo "
+                                   <tr>
+                                    <td class='table-light table:hover'>";
+                    if(is_dir("../files/Priečinok/$item")){
+                        echo "<a href='index.php'>".$item."</a>";
+                    }
+                    else {
+                        $tmp = explode("-",$item);
+                        $ext = explode(".",$tmp[1]);
+                        echo $tmp[0].".".$ext[1];
+                    }
+                    echo "
+                                    </td>
+                                     <td class='table-light table:hover'>".(is_dir("../files/Priečinok/$item")? (' ') : round((filesize("../files/Priečinok/$item") / 1024), 0))."</td>
+                                    <td class='table-light table:hover'>".(is_dir("../files/Priečinok/$item")? (' ') : date('M d Y H:i:s',filemtime("../files/Priečinok/$item")))."</td></tr>
+                                    ";
+                }
+            }
+
+
+         ?>
+
+        </table>
+    </div>
+
+
+    <div class="container-card">
+        <div class="card text-white bg-dark">
+            <div class="card-body">
+                <form action="upload.php" method="post" enctype="multipart/form-data">
+                    <label for="renameFile">Zadaj názov:</label>
+                    <input type="text" name="renameFile" id="renameFile">
+
+                    <input type="file" name="fileToUpload" id="fileToUpload">
+                    <input  type="submit" value="Upload Image" name="submit" id="submitBtn">
+                </form>
+            </div>
         </div>
     </div>
-</div>
-
-
 
 
 </main>
 
 
-<script src="js/script.js"></script>
 </body>
 
 </html>
